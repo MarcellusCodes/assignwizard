@@ -20,7 +20,64 @@ model Example {
     updatedAt DateTime @updatedAt
 }
 
-// Necessary for Next auth
+model Assignment {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    title     String
+    description   String
+    deadline   DateTime
+    password String? 
+    protected Boolean  @default(false)
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String
+    students  Student[]
+    questions Question[]
+}
+
+model Student {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    name      String
+    email     String
+    assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+    assignmentId String
+    entries   Entry[]
+}
+
+model Question {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    title     String
+    description   String
+    assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+    assignmentId String
+    choices   Choice[]
+}
+
+model Choice {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    correct  Boolean
+    answer   String
+    question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    questionId String
+}
+
+model Entry {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+    studentId String
+    questionId String
+    choiceId String
+}
+
+
 model Account {
     id                String  @id @default(cuid())
     userId            String
@@ -54,6 +111,7 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    assignments Assignment[]
 }
 
 model VerificationToken {
