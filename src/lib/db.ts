@@ -1,16 +1,13 @@
-import { Redis } from "@upstash/redis";
-
+import { PrismaClient } from "@prisma/client";
 import { env } from "~/env.mjs";
 
-const globalForRedis = globalThis as unknown as { redis: Redis };
+const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
-const redis =
-  globalForRedis.redis ||
-  new Redis({
-    url: env.UPSTASH_REDIS_URL,
-    token: env.UPSTASH_REDIS_TOKEN,
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log:
+      env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
 
-if (env.NODE_ENV !== "production") globalForRedis.redis = redis;
-
-export default redis;
+if (env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

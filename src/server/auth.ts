@@ -6,8 +6,8 @@ import {
 } from "next-auth";
 import { env } from "~/env.mjs";
 import GoogleProvider from "next-auth/providers/google";
-import { UpstashRedisAdapter } from "@next-auth/upstash-redis-adapter";
-import { redis } from "~/lib/index";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { prisma } from "~/lib/index";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -46,7 +46,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
 
-  adapter: UpstashRedisAdapter(redis),
+  adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,

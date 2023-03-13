@@ -18,8 +18,7 @@ const server = z.object({
     process.env.VERCEL ? z.string().min(1) : z.string().url()
   ),
   // Add `.min(1) on ID and SECRET if you want to make sure they're not empty
-  UPSTASH_REDIS_URL: z.string().url(),
-  UPSTASH_REDIS_TOKEN: z.string(),
+  DATABASE_URL: z.string().url(),
   GOOGLE_CLIENT_SECRET: z.string(),
   GOOGLE_CLIENT_ID: z.string(),
 });
@@ -42,8 +41,7 @@ const processEnv = {
   NODE_ENV: process.env.NODE_ENV,
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
   NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-  UPSTASH_REDIS_TOKEN: process.env.UPSTASH_REDIS_TOKEN,
-  UPSTASH_REDIS_URL: process.env.UPSTASH_REDIS_URL,
+  DATABASE_URL: process.env.DATABASE_URL,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,

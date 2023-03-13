@@ -1,1 +1,1 @@
-export { default as redis } from "./db";
+export { prisma } from "./db";
