@@ -29,6 +29,7 @@ model Assignment {
     deadline   DateTime
     password String? 
     protected Boolean  @default(false)
+    closed Boolean @default(false)
     user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId    String
     students  Student[]

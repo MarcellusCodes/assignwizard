@@ -2,11 +2,38 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
-
 import { api } from "~/utils/api";
+import { AddAssignmentForm } from "~/components";
 
 const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
+  const utils = api.useContext();
+  const { data: assignments, isLoading: isLoading } =
+    api.assignment.getAll.useQuery();
+  const addAssignment = api.assignment.add.useMutation({
+    onSuccess: async () => {
+      await utils.assignment.getAll.invalidate();
+    },
+  });
+  const deleteAssignment = api.assignment.delete.useMutation({
+    onSuccess: async () => {
+      await utils.assignment.getAll.invalidate();
+    },
+  });
+  const closeAssignment = api.assignment.close.useMutation({
+    onSuccess: async () => {
+      await utils.assignment.getAll.invalidate();
+    },
+  });
+
+  const handleAddAssignment = () => {
+    addAssignment.mutate({
+      title: "Test1",
+      description: "This is just a test description for Test1",
+      deadline: new Date().toString(),
+      protected: false,
+      password: "",
+    });
+  };
 
   return (
     <>
@@ -44,10 +71,44 @@ const Home: NextPage = () => {
               </div>
             </Link>
           </div>
+          {isLoading && <div>Loading...</div>}
+          {assignments &&
+            assignments.map((assignment) => (
+              <div
+                className=" border-2 border-purple-300 p-6"
+                key={assignment.id}
+              >
+                {assignment.title}
+                <span>Open for Entries: {assignment.closed ? "❌" : "✔"}</span>
+                <Link
+                  className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
+                  href={`/assignment/${assignment.id}`}
+                >
+                  View
+                </Link>
+                <button
+                  onClick={() => {
+                    deleteAssignment.mutate({ id: assignment.id });
+                  }}
+                  className="flex max-w-xs flex-col gap-4 rounded-xl bg-red-600/30 p-4 text-white hover:bg-red-600/20"
+                >
+                  {deleteAssignment.isLoading ? "Deleting..." : "Delete"}
+                </button>
+                <button
+                  onClick={() => {
+                    closeAssignment.mutate({ id: assignment.id });
+                  }}
+                  className="flex max-w-xs flex-col gap-4 rounded-xl bg-red-600/30 p-4 text-white hover:bg-red-600/20"
+                >
+                  {closeAssignment.isLoading
+                    ? "Closing... Assignment"
+                    : "Close"}
+                </button>
+              </div>
+            ))}
+          <button onClick={handleAddAssignment}>Add Assignment</button>
+          <AddAssignmentForm />
           <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello.data ? hello.data.greeting : "Loading tRPC query..."}
-            </p>
             <AuthShowcase />
           </div>
         </div>
@@ -60,6 +121,7 @@ export default Home;
 
 const AuthShowcase: React.FC = () => {
   const { data: sessionData } = useSession();
+  console.log(sessionData);
 
   const { data: secretMessage } = api.example.getSecretMessage.useQuery(
     undefined, // no input
