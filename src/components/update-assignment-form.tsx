@@ -2,10 +2,12 @@ import * as Form from "@radix-ui/react-form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "~/utils/api";
-import { addAssignmentSchema } from "~/schemas";
+import { updateAssignmentSchema } from "~/schemas";
 import type { AddAssignment } from "~/types";
 
-const AddAssignmentForm = () => {
+const UpdateAssignmentForm = ({ id }: { id: string }) => {
+  const { data: assignment, isLoading: isLoading } =
+    api.assignment.get.useQuery({ id });
   const {
     register,
     handleSubmit,
@@ -13,25 +15,34 @@ const AddAssignmentForm = () => {
     reset,
     formState: { errors },
   } = useForm<AddAssignment>({
-    resolver: zodResolver(addAssignmentSchema),
+    resolver: zodResolver(updateAssignmentSchema),
+    defaultValues: {
+      id: assignment.id,
+      title: assignment.title,
+      description: assignment.description,
+      deadline: new Date(assignment.deadline.toLocaleDateString()),
+      protected: assignment.protected,
+      password: assignment.password || "",
+    },
   });
   const utils = api.useContext();
 
-  const addAssignment = api.assignment.add.useMutation({
-    onSuccess: async () => {
-      await utils.assignment.getAll.invalidate();
-      reset({
-        title: "",
-        description: "",
-        deadline: "",
-        protected: false,
-        password: "",
-      });
+  const updateAssignment = api.assignment.update.useMutation({
+    onSuccess: async (success) => {
+      await utils.assignment.get.invalidate({ id: id });
+      console.log(assignment, success);
+      reset((formValues) => ({
+        ...formValues,
+      }));
+    },
+    onError(error) {
+      console.log(error);
     },
   });
 
   const handleAddAssignment = (data: AddAssignment) => {
-    addAssignment.mutate({
+    updateAssignment.mutate({
+      id: assignment.id,
       title: data.title,
       description: data.description,
       deadline: data.deadline,
@@ -93,9 +104,13 @@ const AddAssignmentForm = () => {
           </Form.Message>
         </Form.Field>
       )}
-      <Form.Submit>Submit</Form.Submit>
+      <Form.Submit asChild>
+        <button type="submit">
+          {updateAssignment.isLoading ? "Updating..." : "Update"}
+        </button>
+      </Form.Submit>
     </Form.Root>
   );
 };
 
-export default AddAssignmentForm;
+export default UpdateAssignmentForm;
